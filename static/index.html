@@ -1,0 +1,96 @@
+<html>
+  <head>
+    <title>Print</title>
+  </head>
+  <body>
+    <h1>Upload a file to print</h1>
+    <form id="fileform">
+      <label for="file">File to print</label>
+      <input type="file" name="file" id="file" accept="application/pdf" />
+      <br /><br />
+
+      <label for="file">Select a printer</label>
+      <select id="printers"></select>
+      <br /><br />
+
+      <label for="two-sided">Two-sided?</label>
+      <input type="checkbox" id="two-sided" checked />
+      <br /><br />
+
+      <input type="submit" />
+
+      <pre id="response"></pre>
+    </form>
+    <script>
+      (async () => {
+        const printers = await (
+          await fetch("/printers", {
+            method: "GET",
+          })
+        ).json();
+
+        printers.forEach((printer) => {
+          const selectablePrinter = document.createElement("option");
+          selectablePrinter.value = printer.name;
+          selectablePrinter.innerHTML = `${printer.name} - ${printer.state}`;
+
+          document.getElementById("printers").append(selectablePrinter);
+        });
+      })();
+
+      async function processForm(e) {
+        if (e.preventDefault) e.preventDefault();
+        const file = document.querySelector("input[type=file]").files[0];
+        const printer = document.getElementById("printers").value;
+        const twoSided = document.getElementById("two-sided").checked;
+        if (!file) {
+          document.getElementById("response").innerHTML = "No file selected!";
+          return false;
+        }
+        if (!printer) {
+          document.getElementById("response").innerHTML = "No file selected!";
+          return false;
+        }
+
+        const formData = new FormData();
+        const body = {
+          printer: printer,
+          options: {
+            two_sided: twoSided,
+          },
+        };
+        formData.append(
+          "job_info",
+          new Blob([JSON.stringify(body)], {
+            type: "application/json",
+          })
+        );
+        formData.append("file", file);
+
+        const response = await (
+          await fetch("/printers/print", {
+            method: "POST",
+            body: formData,
+          })
+        ).json();
+
+        console.log(response);
+
+        document.getElementById("response").innerHTML = JSON.stringify(
+          response,
+          null,
+          4
+        );
+
+        return false;
+      }
+
+      var form = document.getElementById("fileform");
+      if (form.attachEvent) {
+        form.attachEvent("submit", processForm);
+      } else {
+        form.addEventListener("submit", processForm);
+      }
+    </script>
+  </body>
+</html>
