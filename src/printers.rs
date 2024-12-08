@@ -130,8 +130,13 @@ async fn print_doc(
                     .unwrap_or(false)
             {
                 builder = builder.attribute(IppAttribute::new(
-                    "sides-supported",
+                    "sides",
                     IppValue::Keyword("two-sided-long-edge".to_string()),
+                ));
+            } else if printer.capabilites.two_sided {
+                builder = builder.attribute(IppAttribute::new(
+                    "sides",
+                    IppValue::Keyword("one-sided".to_string()),
                 ));
             }
 

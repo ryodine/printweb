@@ -76,11 +76,9 @@
 
         console.log(response);
 
-        document.getElementById("response").innerHTML = JSON.stringify(
-          response,
-          null,
-          4
-        );
+        document.getElementById("response").innerHTML = `
+Request: ${JSON.stringify(body, null, 4)}
+Response: ${JSON.stringify(response, null, 4)}`;
 
         return false;
       }
